@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const UmaCard = ({ uma, borrarUma }) => {
+const UmaCard = ({ uma, borrarUma, editarUma }) => {
   const navigate = useNavigate();
 
   const irAInfo = () => {
@@ -28,7 +28,7 @@ const UmaCard = ({ uma, borrarUma }) => {
         </button>
         <button
           type="button"
-          onClick={() => console.log("Editar uma")}
+          onClick={editarUma}
           className="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded shadow-lg"
         >
           Editar

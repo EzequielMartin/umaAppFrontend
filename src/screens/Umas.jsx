@@ -10,6 +10,7 @@ const Umas = () => {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [nameFilter, setNameFilter] = useState("");
+  const [initialUma, setInitialUma] = useState(null); //Initial uma es donde voy a settear la uma que voy a editar
 
   useEffect(() => {
     const fetchUmas = async () => {
@@ -25,11 +26,21 @@ const Umas = () => {
     fetchUmas();
   }, []);
 
-  const updateUmas = (newUmas) => {
-    setUmas(newUmas);
+  //El prop onSubmit de UmaFormModal va a ser una de estas dos funciones dependiendo de si estoy agregando o editando una Uma
+
+  const handleAddUma = async (newUma) => {
+    await umaService.create(newUma);
+    const response = await umaService.getAll();
+    setUmas(response.data);
   };
 
-  const borrarUma = async (uma) => {
+  const handleUpdateUma = async (updatedUmaId, updatedUma) => {
+    await umaService.update(updatedUmaId, updatedUma);
+    const response = await umaService.getAll();
+    setUmas(response.data);
+  };
+
+  const handleDeleteUma = async (uma) => {
     try {
       if (window.confirm(`¿Seguro que querés borrar a ${uma.name}?`)) {
         await umaService.remove(uma.id);
@@ -45,7 +56,11 @@ const Umas = () => {
       <h1 className="text-4xl font-extrabold mb-4">Lista de Umas</h1>
       <div className="flex items-center gap-4">
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            /* Cuando voy a agregar una Uma nueva la initial Uma va a ser null, abro el modal de agregar Uma */
+            setInitialUma(null);
+            setShowModal(true);
+          }}
           className="bg-blue-600 hover:bg-blue-800 text-white dark:text-gray-200 font-bold py-2 px-4 rounded shadow-lg"
         >
           Agregar Uma
@@ -76,7 +91,15 @@ const Umas = () => {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <UmaCard uma={uma} borrarUma={() => borrarUma(uma)} />
+                  <UmaCard
+                    uma={uma}
+                    borrarUma={() => handleDeleteUma(uma)}
+                    editarUma={() => {
+                      /* Cuando voy a editar una Uma, voy a setear la Uma a editar en Initial uma y abro el modal de edicion (es el mismo que el de adicion pero con los datos de la Uma inicial cargados) */
+                      setInitialUma(uma);
+                      setShowModal(true);
+                    }}
+                  />
                 </motion.div>
               ))}
           </AnimatePresence>
@@ -85,8 +108,14 @@ const Umas = () => {
 
       {showModal && (
         <UmaFormModal
-          closeModal={() => setShowModal(false)}
-          onUmaAdded={updateUmas}
+          closeModal={() => {
+            /* Cuando se cierra el modal se pone como null la Uma inicial y se oculta el modal del formulario */
+            setInitialUma(null);
+            setShowModal(false);
+          }}
+          /* Si initialUma es null voy a pasarle el handleAddUma y si es distinto de null (estoy editando) le paso el handleUpdateUma */
+          onSubmit={initialUma ? handleUpdateUma : handleAddUma}
+          initialUma={initialUma}
         />
       )}
     </div>

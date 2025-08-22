@@ -1,17 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import umaService from "../services/umas";
 
-const UmaFormModal = ({ closeModal, onUmaAdded }) => {
+const UmaFormModal = ({ closeModal, onSubmit, initialUma }) => {
   const [name, setName] = useState("");
   const [colorOjos, setColorOjos] = useState("");
   const [colorPelo, setColorPelo] = useState("");
   const [altura, setAltura] = useState("");
   const [imageBase64, setImageBase64] = useState("");
 
+  //initialUma va a ser distinto de null si estoy editando una uma, ya que la paso desde Umas.jsx
+
+  useEffect(() => {
+    if (initialUma) {
+      //initialUma es distinto de null (estoy editando), entonces cargo los campos del formulario con los valores iniciales de la Uma que estoy editando, asi edito solo los campos que necesito
+      setName(initialUma.name || "");
+      setColorOjos(initialUma.eye_color || "");
+      setColorPelo(initialUma.hair_color || "");
+      setAltura(initialUma.height || "");
+      setImageBase64(initialUma.avatar || "");
+    }
+  }, [initialUma]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    //Agrego la UMA
 
     try {
       const umaObject = {
@@ -21,10 +32,15 @@ const UmaFormModal = ({ closeModal, onUmaAdded }) => {
         height: altura,
         avatar: imageBase64,
       };
-      await umaService.create(umaObject);
-      const response = await umaService.getAll();
-      const umaList = response.data;
-      onUmaAdded(umaList);
+
+      //Si initialUma es distinto de null (estoy editando) voy a llamar al onSubmit de dos parametros, este es el handleUpdateUma que esta en Umas.jsx
+      if (initialUma) {
+        await onSubmit(initialUma.id, umaObject);
+      } else {
+        //Si initialUma es null (estoy agregando) voy a llamar al onSubmit de un parametros, este es el handleAddUma que esta en Umas.jsx
+        await onSubmit(umaObject);
+      }
+
       closeModal();
     } catch (error) {
       console.error("Error: ", error);
@@ -45,7 +61,10 @@ const UmaFormModal = ({ closeModal, onUmaAdded }) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded shadow-lg w-96 dark:bg-gray-700 dark:text-gray-200">
-        <h2 className="text-lg font-bold mb-4">Agregar Uma</h2>
+        <h2 className="text-lg font-bold mb-4">
+          {/* Si initialUma es distinto de null estoy editando, sino estoy agregando */}
+          {initialUma ? "Editar Uma" : "Agregar Uma"}
+        </h2>
         <form onSubmit={handleSubmit} className="flex flex-col">
           <label htmlFor="name" className="font-semibold">
             Nombre
@@ -111,7 +130,8 @@ const UmaFormModal = ({ closeModal, onUmaAdded }) => {
               type="submit"
               className="bg-blue-500 hover:bg-blue-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded"
             >
-              Agregar
+              {/* Si initialUma es distinto de null estoy editando, sino estoy agregando */}
+              {initialUma ? "Guardar Cambios" : "Agregar"}
             </button>
             <button
               type="button"
