@@ -67,7 +67,7 @@ const Umas = () => {
         </button>
         <input
           type="text"
-          className="ml-auto bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 dark:text-white py-2 px-4 rounded shadow-lg"
+          className="ml-auto w-48 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 dark:text-white py-2 px-4 rounded shadow-lg"
           placeholder="Filtrar por nombre"
           value={nameFilter}
           onChange={(e) => setNameFilter(e.target.value)}
