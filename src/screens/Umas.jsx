@@ -11,6 +11,7 @@ const Umas = () => {
   const [loading, setLoading] = useState(true);
   const [nameFilter, setNameFilter] = useState("");
   const [initialUma, setInitialUma] = useState(null); //Initial uma es donde voy a settear la uma que voy a editar
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchUmas = async () => {
@@ -44,12 +45,55 @@ const Umas = () => {
     try {
       if (window.confirm(`¿Seguro que querés borrar a ${uma.name}?`)) {
         await umaService.remove(uma.id);
-        setUmas((prevUmas) => prevUmas.filter((u) => u.id !== uma.id));
+        setUmas((prevUmas) => {
+          const updatedUmas = prevUmas.filter((u) => u.id !== uma.id);
+
+          //Hago que en caso de borrar la unica uma de una pagina no me deje en una pagina vacia
+
+          const totalPages = Math.ceil(updatedUmas.length / itemsPerPage);
+
+          //Inicializo la newPage con la currentPage.
+          //Si la pagina sigue teniendo elementos, en el setCurrentPage voy a dejar la pagina actual
+          let newPage = currentPage;
+
+          //Calculo el primer indice de la pagina actual
+          const firstIndex = (currentPage - 1) * itemsPerPage;
+
+          if (firstIndex >= updatedUmas.length && totalPages > 0) {
+            //Si el indice del primer elemento de la pagina es mayor a la cantidad total de umas,
+            //significa que la pagina actual no tiene elementos,
+            //entonces voy a poner como pagina actual a la ultima pagina con elementos
+            //Ademas el totalPages > 0 asegura que hay al menos una pagina con contenido
+            newPage = totalPages;
+          } else if (totalPages === 0) {
+            //Si la cantidad de paginas es 0, significa que no hay elementos,
+            //entones pongo como pagina actual a la pagina numero 1
+            newPage = 1;
+          }
+
+          setCurrentPage(newPage);
+
+          //Retorno lo que quiero aplicarle al setUmas().
+          //Ya que no lo hago en una unica linea sino multiples lineas envueltas en {},
+          //le debo pasar que es lo que quiero que quede en setUmas() en el return.
+          return updatedUmas;
+        });
       }
     } catch (error) {
       console.error("Error: ", error);
     }
   };
+
+  //Implemento lo necesario para poder trabajar con paginas
+
+  const itemsPerPage = 6;
+  const filteredUmas = umas.filter((uma) =>
+    uma.name.toLowerCase().includes(nameFilter.toLowerCase())
+  );
+  const totalPages = Math.ceil(filteredUmas.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentUmas = filteredUmas.slice(startIndex, endIndex);
 
   return (
     <div className="p-4 pb-5">
@@ -77,19 +121,18 @@ const Umas = () => {
       {loading ? (
         <SkeletonUmaCard />
       ) : (
-        <div className="flex flex-wrap gap-6 justify-center p-4">
-          <AnimatePresence>
-            {umas
-              .filter((uma) =>
-                uma.name.toLowerCase().includes(nameFilter.toLowerCase())
-              )
-              .map((uma) => (
+        <>
+          <AnimatePresence mode="wait">
+            {/* Uso el mode="wait" asi los elemntos nuevos aparecen una vez que
+            desaparecieron los anteriors, sino se ve mal */}
+            <div className="flex flex-wrap gap-6 justify-center p-4">
+              {currentUmas.map((uma) => (
                 <motion.div
                   key={uma.id}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
+                  transition={{ duration: 1 }}
                 >
                   <UmaCard
                     uma={uma}
@@ -102,8 +145,30 @@ const Umas = () => {
                   />
                 </motion.div>
               ))}
+            </div>
           </AnimatePresence>
-        </div>
+          <div className="flex justify-center mt-6 gap-2">
+            <button
+              disabled={currentPage <= 1}
+              onClick={() => setCurrentPage((prev) => prev - 1)}
+              className="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded disabled:opacity-50"
+            >
+              Anterior
+            </button>
+
+            <span className="px-4 py-2">
+              Página {currentPage} de {totalPages}
+            </span>
+
+            <button
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+              className="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded disabled:opacity-50"
+            >
+              Siguiente
+            </button>
+          </div>
+        </>
       )}
 
       {showModal && (
