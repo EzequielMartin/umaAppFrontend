@@ -61,13 +61,13 @@ const Umas = () => {
             setInitialUma(null);
             setShowModal(true);
           }}
-          className="bg-blue-600 hover:bg-blue-800 text-white dark:text-gray-200 font-bold py-2 px-4 rounded shadow-lg"
+          className="bg-blue-600/80 hover:bg-blue-800/80 text-white dark:text-gray-200 font-bold py-2 px-4 rounded shadow-lg"
         >
           Agregar Uma
         </button>
         <input
           type="text"
-          className="ml-auto bg-gray-200 dark:bg-gray-600 dark:text-white py-2 px-4 rounded shadow-lg"
+          className="ml-auto bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 dark:text-white py-2 px-4 rounded shadow-lg"
           placeholder="Filtrar por nombre"
           value={nameFilter}
           onChange={(e) => setNameFilter(e.target.value)}

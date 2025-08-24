@@ -51,7 +51,7 @@ const UmaInfo = () => {
               <button
                 type="button"
                 onClick={() => navigate(`/umas`)}
-                className="bg-blue-500 hover:bg-blue-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded"
+                className="bg-blue-600/80 hover:bg-blue-800/80 text-white dark:text-gray-200 font-bold py-2 px-4 rounded"
               >
                 Volver
               </button>
