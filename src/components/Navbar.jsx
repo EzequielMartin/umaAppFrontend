@@ -4,7 +4,7 @@ import { Menu, X } from "lucide-react";
 import logo from "../assets/Uma_Musume_Logo.webp";
 import { motion, AnimatePresence } from "framer-motion";
 
-const Navbar = () => {
+const Navbar = ({ user, setUser }) => {
   const [darkMode, setDarkMode] = useState(() => {
     const storedMode = localStorage.getItem("darkMode");
     return storedMode ? JSON.parse(storedMode) : false;
@@ -22,9 +22,14 @@ const Navbar = () => {
     localStorage.setItem("darkMode", JSON.stringify(darkMode));
   }, [darkMode]);
 
+  const handleLogout = () => {
+    window.localStorage.removeItem("loggedUmaappUser");
+    setUser(null);
+  };
+
   return (
     <nav className="bg-gray-100 p-4 dark:bg-gray-900">
-      <div className="grid lg:grid-cols-3 grid-cols-2 items-center">
+      <div className="flex items-center justify-between">
         <Link to="/">
           <img
             src={logo}
@@ -55,12 +60,22 @@ const Navbar = () => {
             Contacto
           </Link>
         </div>
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          className="hidden lg:flex justify-self-end px-4 py-2 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 hover:from-gray-400 hover:via-gray-300 hover:to-gray-200 hover:dark:from-gray-700 hover:dark:via-gray-800 hover:dark:to-gray-900 cursor-pointer rounded shadow-lg" /*Con el ml-auto hago que me agregue un margen de todo el ancho a la izquierda, por lo que los links quedan bien a la izquierda y el boton bien a la derecha*/
-        >
-          {darkMode ? "☀️" : "🌙"}
-        </button>
+        <div className="lg:flex justify-self-end space-x-2">
+          {user && (
+            <button
+              onClick={() => handleLogout()}
+              className="hidden lg:flex font-bold px-4 py-2 text-black dark:text-white rounded bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 hover:from-gray-400 hover:via-gray-300 hover:to-gray-200 hover:dark:from-gray-700 hover:dark:via-gray-800 hover:dark:to-gray-900 shadow-lg"
+            >
+              Logout
+            </button>
+          )}
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="hidden lg:flex px-4 py-2 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 hover:from-gray-400 hover:via-gray-300 hover:to-gray-200 hover:dark:from-gray-700 hover:dark:via-gray-800 hover:dark:to-gray-900 cursor-pointer rounded shadow-lg" /*Con el ml-auto hago que me agregue un margen de todo el ancho a la izquierda, por lo que los links quedan bien a la izquierda y el boton bien a la derecha*/
+          >
+            {darkMode ? "☀️" : "🌙"}
+          </button>
+        </div>
         <button
           onClick={() => setOpen(!open)}
           className="lg:hidden flex justify-self-end px-4 py-2 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 hover:from-gray-400 hover:via-gray-300 hover:to-gray-200 hover:dark:from-gray-700 hover:dark:via-gray-800 hover:dark:to-gray-900 cursor-pointer rounded shadow-lg" /*Con el ml-auto hago que me agregue un margen de todo el ancho a la izquierda, por lo que los links quedan bien a la izquierda y el boton bien a la derecha*/
@@ -122,6 +137,14 @@ const Navbar = () => {
               >
                 Contacto
               </Link>
+              {user && (
+                <button
+                  onClick={() => handleLogout()}
+                  className="font-bold text-center px-4 py-2 text-black dark:text-white rounded bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 hover:from-gray-400 hover:via-gray-300 hover:to-gray-200 hover:dark:from-gray-700 hover:dark:via-gray-800 hover:dark:to-gray-900 shadow-lg"
+                >
+                  Logout
+                </button>
+              )}
               <button
                 onClick={() => setDarkMode(!darkMode)}
                 className="px-4 py-2 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 hover:from-gray-400 hover:via-gray-300 hover:to-gray-200 hover:dark:from-gray-700 hover:dark:via-gray-800 hover:dark:to-gray-900 cursor-pointer rounded shadow-lg" /*Con el ml-auto hago que me agregue un margen de todo el ancho a la izquierda, por lo que los links quedan bien a la izquierda y el boton bien a la derecha*/

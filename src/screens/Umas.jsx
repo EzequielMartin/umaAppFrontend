@@ -4,8 +4,9 @@ import umaService from "../services/umas";
 import UmaFormModal from "../components/UmaFormModal";
 import SkeletonUmaCard from "../components/SkeletonUmaCard";
 import { motion, AnimatePresence } from "framer-motion";
+import LoginForm from "../components/LoginForm";
 
-const Umas = () => {
+const Umas = ({ user, setUser }) => {
   const [umas, setUmas] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -15,9 +16,11 @@ const Umas = () => {
 
   useEffect(() => {
     const fetchUmas = async () => {
+      if (!user || !user.token) return;
       try {
-        const response = await umaService.getAll();
-        setUmas(response.data);
+        setLoading(true);
+        const umas = await umaService.getAll();
+        setUmas(umas);
       } catch (error) {
         console.error("Error al cargar las Umas: ", error);
       } finally {
@@ -25,20 +28,20 @@ const Umas = () => {
       }
     };
     fetchUmas();
-  }, []);
+  }, [user]);
 
   //El prop onSubmit de UmaFormModal va a ser una de estas dos funciones dependiendo de si estoy agregando o editando una Uma
 
   const handleAddUma = async (newUma) => {
     await umaService.create(newUma);
-    const response = await umaService.getAll();
-    setUmas(response.data);
+    const updatedUmas = await umaService.getAll();
+    setUmas(updatedUmas);
   };
 
   const handleUpdateUma = async (updatedUmaId, updatedUma) => {
     await umaService.update(updatedUmaId, updatedUma);
-    const response = await umaService.getAll();
-    setUmas(response.data);
+    const updatedUmas = await umaService.getAll();
+    setUmas(updatedUmas);
   };
 
   const handleDeleteUma = async (uma) => {
@@ -96,94 +99,105 @@ const Umas = () => {
   const currentUmas = filteredUmas.slice(startIndex, endIndex);
 
   return (
-    <div className="p-4 pb-5">
-      <h1 className="text-4xl font-extrabold mb-4">Lista de Umas</h1>
-      <div className="flex items-center gap-4">
-        <button
-          onClick={() => {
-            /* Cuando voy a agregar una Uma nueva la initial Uma va a ser null, abro el modal de agregar Uma */
-            setInitialUma(null);
-            setShowModal(true);
-          }}
-          className="bg-blue-600/80 hover:bg-blue-800/80 text-white dark:text-gray-200 font-bold py-2 px-4 rounded shadow-lg"
-        >
-          Agregar Uma
-        </button>
-        <input
-          type="text"
-          className="ml-auto w-48 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 dark:text-white py-2 px-4 rounded shadow-lg"
-          placeholder="Filtrar por nombre"
-          value={nameFilter}
-          onChange={(e) => setNameFilter(e.target.value)}
-        />
-      </div>
-
-      {loading ? (
-        <SkeletonUmaCard />
-      ) : (
-        <>
-          <AnimatePresence mode="wait">
-            {/* Uso el mode="wait" asi los elemntos nuevos aparecen una vez que
-            desaparecieron los anteriors, sino se ve mal */}
-            <div className="flex flex-wrap gap-6 justify-center p-4">
-              {currentUmas.map((uma) => (
-                <motion.div
-                  key={uma.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 1 }}
-                >
-                  <UmaCard
-                    uma={uma}
-                    borrarUma={() => handleDeleteUma(uma)}
-                    editarUma={() => {
-                      /* Cuando voy a editar una Uma, voy a setear la Uma a editar en Initial uma y abro el modal de edicion (es el mismo que el de adicion pero con los datos de la Uma inicial cargados) */
-                      setInitialUma(uma);
-                      setShowModal(true);
-                    }}
-                  />
-                </motion.div>
-              ))}
-            </div>
-          </AnimatePresence>
-          <div className="flex justify-center mt-6 gap-2">
+    <>
+      {user ? (
+        <div className="p-4 pb-5">
+          <h1 className="text-4xl font-extrabold mb-4">Lista de Umas</h1>
+          <div className="flex items-center gap-4">
             <button
-              disabled={currentPage <= 1}
-              onClick={() => setCurrentPage((prev) => prev - 1)}
-              className="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded disabled:opacity-50"
+              onClick={() => {
+                /* Cuando voy a agregar una Uma nueva la initial Uma va a ser null, abro el modal de agregar Uma */
+                setInitialUma(null);
+                setShowModal(true);
+              }}
+              className="bg-blue-600/80 hover:bg-blue-800/80 text-white dark:text-gray-200 font-bold py-2 px-4 rounded shadow-lg"
             >
-              Anterior
+              Agregar Uma
             </button>
-
-            <span className="px-4 py-2">
-              Página {currentPage} de {totalPages}
-            </span>
-
-            <button
-              disabled={currentPage >= totalPages}
-              onClick={() => setCurrentPage((prev) => prev + 1)}
-              className="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded disabled:opacity-50"
-            >
-              Siguiente
-            </button>
+            <input
+              type="text"
+              className="ml-auto w-48 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 dark:text-white py-2 px-4 rounded shadow-lg"
+              placeholder="Filtrar por nombre"
+              value={nameFilter}
+              onChange={(e) => setNameFilter(e.target.value)}
+            />
           </div>
-        </>
-      )}
 
-      {showModal && (
-        <UmaFormModal
-          closeModal={() => {
-            /* Cuando se cierra el modal se pone como null la Uma inicial y se oculta el modal del formulario */
-            setInitialUma(null);
-            setShowModal(false);
-          }}
-          /* Si initialUma es null voy a pasarle el handleAddUma y si es distinto de null (estoy editando) le paso el handleUpdateUma */
-          onSubmit={initialUma ? handleUpdateUma : handleAddUma}
-          initialUma={initialUma}
-        />
+          {loading ? (
+            <SkeletonUmaCard />
+          ) : (
+            <>
+              <AnimatePresence mode="wait">
+                {/* Uso el mode="wait" asi los elemntos nuevos aparecen una vez que
+            desaparecieron los anteriors, sino se ve mal */}
+                <div className="flex flex-wrap gap-6 justify-center p-4">
+                  {currentUmas.map((uma) => (
+                    <motion.div
+                      key={uma.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 1 }}
+                    >
+                      <UmaCard
+                        uma={uma}
+                        borrarUma={() => handleDeleteUma(uma)}
+                        editarUma={() => {
+                          /* Cuando voy a editar una Uma, voy a setear la Uma a editar en Initial uma y abro el modal de edicion (es el mismo que el de adicion pero con los datos de la Uma inicial cargados) */
+                          setInitialUma(uma);
+                          setShowModal(true);
+                        }}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+              </AnimatePresence>
+              <div className="flex justify-center mt-6 gap-2">
+                <button
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                  className="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded disabled:opacity-50"
+                >
+                  Anterior
+                </button>
+
+                <span className="px-4 py-2">
+                  Página {currentPage} de {totalPages}
+                </span>
+
+                <button
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  className="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded disabled:opacity-50"
+                >
+                  Siguiente
+                </button>
+              </div>
+            </>
+          )}
+
+          {showModal && (
+            <UmaFormModal
+              closeModal={() => {
+                /* Cuando se cierra el modal se pone como null la Uma inicial y se oculta el modal del formulario */
+                setInitialUma(null);
+                setShowModal(false);
+              }}
+              /* Si initialUma es null voy a pasarle el handleAddUma y si es distinto de null (estoy editando) le paso el handleUpdateUma */
+              onSubmit={initialUma ? handleUpdateUma : handleAddUma}
+              initialUma={initialUma}
+            />
+          )}
+        </div>
+      ) : (
+        <div className="p-4 pb-5">
+          <h1 className="text-4xl font-extrabold mb-4">
+            Debes loguearte para poder ver la lista de umas
+          </h1>
+          <LoginForm setUser={setUser} />
+        </div>
       )}
-    </div>
+    </>
   );
 };
 
