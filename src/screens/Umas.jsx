@@ -115,6 +115,7 @@ const Umas = ({ user, setUser }) => {
               Agregar Uma
             </button>
             <input
+              id="nameFilter"
               type="text"
               className="ml-auto w-48 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 dark:text-white py-2 px-4 rounded shadow-lg"
               placeholder="Filtrar por nombre"

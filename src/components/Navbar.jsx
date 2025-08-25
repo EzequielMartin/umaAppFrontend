@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, User, X } from "lucide-react";
 import logo from "../assets/Uma_Musume_Logo.webp";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -62,12 +62,18 @@ const Navbar = ({ user, setUser }) => {
         </div>
         <div className="lg:flex justify-self-end space-x-2">
           {user && (
-            <button
-              onClick={() => handleLogout()}
-              className="hidden lg:flex font-bold px-4 py-2 text-black dark:text-white rounded bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 hover:from-gray-400 hover:via-gray-300 hover:to-gray-200 hover:dark:from-gray-700 hover:dark:via-gray-800 hover:dark:to-gray-900 shadow-lg"
-            >
-              Logout
-            </button>
+            <>
+              <div className=" hidden lg:flex flex-row p-2 space-x-1 items-center text-black dark:text-white">
+                <User />
+                <span>{user.username}</span>
+              </div>
+              <button
+                onClick={() => handleLogout()}
+                className="hidden lg:flex font-bold px-4 py-2 text-black dark:text-white rounded bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 hover:from-gray-400 hover:via-gray-300 hover:to-gray-200 hover:dark:from-gray-700 hover:dark:via-gray-800 hover:dark:to-gray-900 shadow-lg"
+              >
+                Logout
+              </button>
+            </>
           )}
           <button
             onClick={() => setDarkMode(!darkMode)}
