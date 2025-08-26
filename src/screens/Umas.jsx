@@ -5,6 +5,7 @@ import UmaFormModal from "../components/UmaFormModal";
 import SkeletonUmaCard from "../components/SkeletonUmaCard";
 import { motion, AnimatePresence } from "framer-motion";
 import LoginForm from "../components/LoginForm";
+import { jwtDecode } from "jwt-decode";
 
 const Umas = ({ user, setUser }) => {
   const [umas, setUmas] = useState([]);
@@ -14,6 +15,7 @@ const Umas = ({ user, setUser }) => {
   const [initialUma, setInitialUma] = useState(null); //Initial uma es donde voy a settear la uma que voy a editar
   const [currentPage, setCurrentPage] = useState(1);
 
+  //Cargo las umas cuando abro la app o cuando cambia el user
   useEffect(() => {
     const fetchUmas = async () => {
       if (!user || !user.token) return;
@@ -29,6 +31,35 @@ const Umas = ({ user, setUser }) => {
     };
     fetchUmas();
   }, [user]);
+
+  //Cierro sesion cuando expira el token
+  useEffect(() => {
+    if (!user || !user.token) return;
+
+    try {
+      const decodedToken = jwtDecode(user.token);
+      const expTime = decodedToken.exp * 1000;
+      const currentTime = Date.now();
+
+      if (expTime <= currentTime) {
+        setUser(null);
+        localStorage.removeItem("loggedUmaappUser");
+        return;
+      }
+
+      const timeUntilExpiration = expTime - currentTime;
+      const timer = setTimeout(() => {
+        setUser(null);
+        localStorage.removeItem("loggedUmaappUser");
+        alert("Tu sesión ha expirado, vuelve a iniciar sesión.");
+      }, timeUntilExpiration);
+      return () => clearTimeout(timer);
+    } catch (error) {
+      console.error("Error al decodificar el token", error);
+      setUser(null);
+      localStorage.removeItem("loggedUmaappUser");
+    }
+  }, [user, setUser]);
 
   //El prop onSubmit de UmaFormModal va a ser una de estas dos funciones dependiendo de si estoy agregando o editando una Uma
 
@@ -100,9 +131,9 @@ const Umas = ({ user, setUser }) => {
 
   return (
     <>
+      <h1 className="text-4xl font-extrabold p-4">Lista de Umas</h1>
       {user ? (
         <div className="p-4 pb-5">
-          <h1 className="text-4xl font-extrabold mb-4">Lista de Umas</h1>
           <div className="flex items-center gap-4">
             <button
               onClick={() => {
@@ -192,9 +223,9 @@ const Umas = ({ user, setUser }) => {
         </div>
       ) : (
         <div className="p-4 pb-5">
-          <h1 className="text-4xl font-extrabold mb-4">
+          <h4 className="text-xl font-extrabold mb-4">
             Debes loguearte para poder ver la lista de umas
-          </h1>
+          </h4>
           <LoginForm setUser={setUser} />
         </div>
       )}
