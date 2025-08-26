@@ -7,6 +7,21 @@ const setToken = (newToken) => {
   token = `Bearer ${newToken}`;
 };
 
+//Deslogueo automaticamente al usuario en caso de recibir un status code 401 en la request
+//Esto lo puedo hacer ya que en el backend, en el controller de umas, retorno status code 401 cuando hay un error con el token
+//Mirar el tokenExtractor del controller umas del backend en caso de duda
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      //Token invalido o vencido, fuerzo logout
+      window.localStorage.removeItem("loggedUmaappUser");
+      window.location.reload();
+    }
+    return Promise.reject(error);
+  }
+);
+
 const getAll = async () => {
   const config = {
     headers: { Authorization: token },
