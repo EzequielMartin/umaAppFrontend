@@ -67,6 +67,19 @@ const Umas = ({ user, setUser }) => {
     await umaService.create(newUma);
     const updatedUmas = await umaService.getAll();
     setUmas(updatedUmas);
+
+    //Hago que, si al agregar una uma esta queda en una pagina siguiente, me mueva a la ultima pagina
+    //Calculo la cantidad de paginas que voy a tener luego de agregar la uma
+    const totalPagesAfterAdd = Math.ceil(updatedUmas.length / itemsPerPage);
+
+    //Calculo el indice de la primer uma de la pagina actual
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    //Calculo el indice de la ultima uma de la pagina actual
+    const endIndex = startIndex + itemsPerPage;
+    //Si la cantidad de umas es mayor que el indice de la ultima uma de la pagina actual, entonces me mueve a la ultima pagina
+    if (updatedUmas.length > endIndex) {
+      setCurrentPage(totalPagesAfterAdd);
+    }
   };
 
   const handleUpdateUma = async (updatedUmaId, updatedUma) => {
