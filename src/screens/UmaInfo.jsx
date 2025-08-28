@@ -13,7 +13,7 @@ const UmaInfo = () => {
     const fetchUma = async () => {
       try {
         const response = await umaService.getOne(id);
-        setUma(response.data);
+        setUma(response);
       } catch (error) {
         console.error("Error obteniendo la uma: ", error);
       }

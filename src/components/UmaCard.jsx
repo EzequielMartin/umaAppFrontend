@@ -9,7 +9,7 @@ const UmaCard = ({ uma, borrarUma, editarUma }) => {
   };
 
   return (
-    <div className="max-w-sm w-64 h-86 hover:scale-102 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 text-gray-800 dark:text-gray-300 p-6 rounded overflow-hidden shadow-lg">
+    <div className="max-w-sm w-64 h-86 hover:scale-102 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-100 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 text-gray-800 dark:text-gray-300 p-6 rounded overflow-hidden shadow-lg hover:shadow-gray-500 dark:hover:shadow-gray-950">
       <img
         className="w-full h-48 object-cover rounded bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 dark:from-gray-800 dark:via-gray-700 dark:to-gray-600"
         src={uma.avatar || "https://via.placeholder.com/400x200"}
